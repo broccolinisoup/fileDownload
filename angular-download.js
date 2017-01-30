@@ -8,14 +8,28 @@ define(['angular'], function (angular) {
 
     module.directive('fileDownload', function () {
         return {
-            restrict: 'A',
-            link: function (scope, element, attr) {
+            restrict: 'E',
+            template : "<a class='btn btn-primary btn-lg'>Download</a>",
+            replace : true,
+            link: function (scope, element) {
                 // When the download is ready, attach the data to the link. Enable the link downloadable
                 scope.$on('download-ready', function (event, data) {
-                    angular.element(element).attr({
-                        href: 'data:attachment/csv,' + encodeURIComponent(data),
-                        download: element.attr('filename')
-                    });
+                    var file = element.attr('file-name');
+                    if(file.indexOf('.') !== -1){
+                        var format = file.substr(file.indexOf('.') + 1);
+                        var dataType = (function (type) {
+                            return {
+                                csv : "data:attachment/csv,",
+                                // pdf : "data:application/pdf;base64,"
+                            }[type];
+                        }(format));
+
+                        if(dataType !== undefined){
+                            element.attr({
+                                href: dataType + encodeURIComponent(data),
+                                download : element.attr('file-name')});
+                        }
+                    }
                 });
             }
         }
